@@ -1,0 +1,83 @@
+\newcommand{\thesisAuthor}{Autor: Econ. Alexis Adonai Morales Alberto}
+\newcommand{\thesisTitle}{Modulo 1: Bases de datos}
+\newcommand{\thesisSubTitle}{Manipulación, tratamiento y procesamiento de datos}
+\newcommand{\thesisTitleTranslated}{Diplomado: Bases de datos y ténicas de graficación}
+\newcommand{\thesisDegree}{Material complementario}
+\newcommand{\university}{SciData}
+\newcommand{\credits}{}
+\newcommand{\faculty}{}
+\newcommand{\thesisPlaceDate}{México, 2025}
+\newcommand{\company}{}
+\definecolor{color1}{RGB}{234, 245, 252}
+
+%------------------------------------------------------------------------------
+\pagecolor{color1}
+\backgroundsetup{contents={}}
+\begin{titlepage}
+
+% Use this line of code if both SLU loggo and company/other institution loggo is desired. The positions are possible to change with the \hspace and \vspace syntax.
+\begin{figure}[h]
+\vspace{-2cm}
+ \centering
+\begin{minipage}[t]{.45\linewidth}
+  \raggedright
+  % Upload and include SLU loggo here:
+  \hspace*{-1cm}\includegraphics[width=0.8\linewidth]{Imagenes/logo2.png}
+  
+\end{minipage}%
+  \begin{minipage}[t]{.45\linewidth}
+  \vspace{-2.5cm}
+ \raggedleft
+% Upload and include other loggo here (loggo of wikipedia is used as an example):
+ \hspace*{1cm}\includegraphics[width =0.5\textwidth]{Imagenes/r.png} \hspace*{-1cm}
+ 
+\end{minipage}
+\end{figure}
+
+
+% Adds background picture. Delete code if no background picture is wanted.
+\begin{tikzpicture}[overlay, remember picture]
+\node[anchor=south west, 
+      xshift=3cm, 
+      yshift=1cm] 
+     at (current page.south west)
+     {\includegraphics[width = 1.2\textwidth, height = 10cm]{Imagenes/background4.png}}; 
+\end{tikzpicture}
+
+
+\vspace{0.5cm}
+\par
+\noindent
+\Huge\center
+\textbf{\thesisTitle}
+\vspace{0.2cm}
+\LARGE
+\par
+\noindent
+\thesisSubTitle\\
+\rule[0.3cm]{\linewidth}{2pt}
+\Large
+
+% Delete this line if no translation is desired
+\noindent
+\textit{\thesisTitleTranslated}
+
+\vspace{1cm}
+\noindent
+\LARGE
+\thesisAuthor\\
+\vspace{1 cm}
+\small
+\par \noindent
+\thesisDegree $\cdot$ \credits
+\par \noindent
+\university
+\par \noindent
+\faculty
+\par \noindent
+\company
+\par \noindent
+\thesisPlaceDate
+
+\end{titlepage}
+\pagecolor{white}
