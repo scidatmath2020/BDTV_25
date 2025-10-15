@@ -1,0 +1,268 @@
+---
+title: "Mi primer salida en RMarkdown"
+output: pdf_document
+date: "2025-10-13"
+---
+
+\pagebreak
+
+# Introducción
+
+Este es un documento de RMarkdown que se elaboró en el curso \textit{técnicas de gráficación y bases de datos con R} impartido por \textbf{\color{blue} SciData} y el profesor \textbf{\color{red} Alexis Adonai Morales Alberto}; donde nos introduciremos en la creación de algunos documentos que serán de utilidad para poder elaborar reportes, informes, presentaciones, análisis, etc. Lo cual puede beneficiar tanto academicamente, así como profesionalmente.
+
+
+# Ecuaciones 
+
+Una ecuación es una \textbf{igualdad matemática} que contiene \textbf{una o más incógnitas} (valores desconocidos) y que expresa una relación de equilibrio entre dos expresiones. En otras palabras, una ecuación afirma \textbf{que dos cantidades son iguales}, y el objetivo normalmente es encontrar el valor de las incógnitas que hacen verdadera esa igualdad.
+
+- Estructura general: 
+
+\begin{gather*}\tag{A}
+  \text{Expresión 1}\, = \text{Expresión 2}
+\end{gather*}
+
+- Ejemplo sencillo: 
+
+\begin{gather*}\tag{Ejemplo 1}
+  2x\,+\,3\,=\,7
+\end{gather*}
+
+
+# Salidas de R 
+
+Para añadir salidas de R, tenemos que integrar en el documento algo llamado \textbf{\color{red} chunk} que es la expresión que utiliza RMarkdown para enlazar código del lenguaje hacia el documento. Sin embargo, este \textbf{\color{red} chunk} contiene multiples opciones, las más elementales son: 
+
+1. \textbf{messange}: Si es verdadero en la salida mostrará los mensajes correspondientes; si es falso no apareceran en la salida los mensajes. 
+
+2. \textbf{warning}: Si es verdadero en la salida mostrará los mensajes precaución que se generen dentro de la programación en el lenguaje; si es falso, los mensajes se mostrarán junto con la salida del procesamiento de R.
+
+3. \textbf{echo}: Controla si el código R dentro del chunk se muestra o no en el documento final.
+
+4. \textbf{include}: En un chunk de RMarkdown controla si los resultados y el código del chunk se muestran o no en el documento.
+
+```{r, message=FALSE, warning=FALSE}
+
+pacman::p_load(
+  "tidyverse",  "dplyr",
+  "tseries",  "readxl",
+  "openxlsx",   "haven",
+  "foreign",  "lubridate",
+  "ggthemes",  "cowplot",
+  "png",  "grid",
+  "ggtext", "extrafont"
+)
+
+
+# Carga de fuentes de Windows (linux, MacOS) ----
+
+# Instalación de fuentes (solo se hace una vez en la versión R) 
+
+# Llamado de fuentes 
+
+loadfonts(device = "win")
+
+# Carga de datos ----
+
+Hojas <- excel_sheets("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Bases de datos/Ejemplo_lineal.xlsx")
+
+Data <- read_excel("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Bases de datos/Ejemplo_lineal.xlsx",
+                   sheet = "Datos")
+
+# Crear una variable temporal ----
+
+Data <- Data %>% 
+  mutate(Año2 = seq(as.Date("2011-01-01"),
+                    as.Date("2025-01-01"),
+                    by = "12 month"))
+
+# Gráficos de tiempo: usando variable de fecha -----
+
+Fuente <- "Goudy Old Style"
+
+Salida <- ggdraw(
+  Data %>% 
+    ggplot(aes(x = Año2, y=Porcentaje))+
+    geom_line(color = "#1C69A8",
+              linewidth = 2.5)+
+    geom_point(size = 4,
+               color = "#1C69A8")+
+    geom_text(aes(label = round(Porcentaje, 1)),
+              vjust = -1,
+              family = Fuente)+
+    scale_x_date(date_breaks = "1 year",
+                 date_labels = "%Y")+
+    scale_y_continuous(limits = c(0, 100))+
+    labs(
+      title = "<b style = 'color:#E7180B'> Población de 18 años y más</b><b style = 'color:#1C69A8'> que confia en los jueces</b>",
+      subtitle = "<i style = 'color:#E7180B'> del 2011 al 2024</i>",
+      caption = "<span style = 'color:#E7180B'> Fuente. INEGI. Encuesta Nacional de Segurdad Urbana (ENSU). 2025.</span>",
+      x = "<span style = 'color:#E7180B'> Año</span>",
+      y = ""
+    )+
+    theme(plot.title = element_markdown(size = 14,
+                                        family = Fuente),
+          plot.subtitle = element_markdown(size = 12,
+                                           family = Fuente),
+          plot.caption = element_markdown(hjust = 0,
+                                          size = 10,
+                                          family = Fuente),
+          axis.title.x = element_markdown(size = 11,
+                                          family = Fuente),
+          axis.text = element_text(color = "#1C69A8",
+                                   face = "bold",
+                                   size = 11,
+                                   family = Fuente),
+          panel.grid.minor = element_blank(),
+          panel.grid.major.x = element_blank(),
+          panel.grid.major.y = element_line(color = alpha("#7CB342",0.5),
+                                            linetype = "dashed"),
+          panel.background = element_rect(fill = "white"),
+          axis.ticks.x = element_blank(),
+          axis.ticks.y = element_line(color = "#7CB342")) 
+)+
+  draw_image("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Imagenes/logo2.png",
+             x = 0.93,
+             y = 0.95,
+             hjust = 0.7, vjust = 0.5,
+             width = 0.2) 
+
+
+
+Salida
+
+
+
+
+```
+
+
+
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
+
+
+# Gráficos de tiempo: usando variable de fecha -----
+
+Fuente <- "Goudy Old Style"
+
+Salida <- ggdraw(
+  Data %>% 
+    ggplot(aes(x = Año2, y=Porcentaje))+
+    geom_line(color = "#1C69A8",
+              linewidth = 2.5)+
+    geom_point(size = 4,
+               color = "#1C69A8")+
+    geom_text(aes(label = round(Porcentaje, 1)),
+              vjust = -1,
+              family = Fuente)+
+    scale_x_date(date_breaks = "1 year",
+                 date_labels = "%Y")+
+    scale_y_continuous(limits = c(0, 100))+
+    labs(
+      title = "<b style = 'color:#E7180B'> Población de 18 años y más</b><b style = 'color:#1C69A8'> que confia en los jueces</b>",
+      subtitle = "<i style = 'color:#E7180B'> del 2011 al 2024</i>",
+      caption = "<span style = 'color:#E7180B'> Fuente. INEGI. Encuesta Nacional de Segurdad Urbana (ENSU). 2025.</span>",
+      x = "<span style = 'color:#E7180B'> Año</span>",
+      y = ""
+    )+
+    theme(plot.title = element_markdown(size = 14,
+                                        family = Fuente),
+          plot.subtitle = element_markdown(size = 12,
+                                           family = Fuente),
+          plot.caption = element_markdown(hjust = 0,
+                                          size = 10,
+                                          family = Fuente),
+          axis.title.x = element_markdown(size = 11,
+                                          family = Fuente),
+          axis.text = element_text(color = "#1C69A8",
+                                   face = "bold",
+                                   size = 11,
+                                   family = Fuente),
+          panel.grid.minor = element_blank(),
+          panel.grid.major.x = element_blank(),
+          panel.grid.major.y = element_line(color = alpha("#7CB342",0.5),
+                                            linetype = "dashed"),
+          panel.background = element_rect(fill = "white"),
+          axis.ticks.x = element_blank(),
+          axis.ticks.y = element_line(color = "#7CB342")) 
+)+
+  draw_image("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Imagenes/logo2.png",
+             x = 0.93,
+             y = 0.95,
+             hjust = 0.7, vjust = 0.5,
+             width = 0.2) 
+
+
+
+Salida
+
+
+
+
+```
+
+
+
+```{r, message=FALSE, warning=FALSE, include = FALSE}
+
+Fuente <- "Goudy Old Style"
+
+Salida <- ggdraw(
+  Data %>% 
+    ggplot(aes(x = Año2, y=Porcentaje))+
+    geom_line(color = "#1C69A8",
+              linewidth = 2.5)+
+    geom_point(size = 4,
+               color = "#1C69A8")+
+    geom_text(aes(label = round(Porcentaje, 1)),
+              vjust = -1,
+              family = Fuente)+
+    scale_x_date(date_breaks = "1 year",
+                 date_labels = "%Y")+
+    scale_y_continuous(limits = c(0, 100))+
+    labs(
+      title = "<b style = 'color:#E7180B'> Población de 18 años y más</b><b style = 'color:#1C69A8'> que confia en los jueces</b>",
+      subtitle = "<i style = 'color:#E7180B'> del 2011 al 2024</i>",
+      caption = "<span style = 'color:#E7180B'> Fuente. INEGI. Encuesta Nacional de Segurdad Urbana (ENSU). 2025.</span>",
+      x = "<span style = 'color:#E7180B'> Año</span>",
+      y = ""
+    )+
+    theme(plot.title = element_markdown(size = 14,
+                                        family = Fuente),
+          plot.subtitle = element_markdown(size = 12,
+                                           family = Fuente),
+          plot.caption = element_markdown(hjust = 0,
+                                          size = 10,
+                                          family = Fuente),
+          axis.title.x = element_markdown(size = 11,
+                                          family = Fuente),
+          axis.text = element_text(color = "#1C69A8",
+                                   face = "bold",
+                                   size = 11,
+                                   family = Fuente),
+          panel.grid.minor = element_blank(),
+          panel.grid.major.x = element_blank(),
+          panel.grid.major.y = element_line(color = alpha("#7CB342",0.5),
+                                            linetype = "dashed"),
+          panel.background = element_rect(fill = "white"),
+          axis.ticks.x = element_blank(),
+          axis.ticks.y = element_line(color = "#7CB342")) 
+)+
+  draw_image("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Imagenes/logo2.png",
+             x = 0.93,
+             y = 0.95,
+             hjust = 0.7, vjust = 0.5,
+             width = 0.2) 
+
+
+
+Salida
+
+```
+
+
+
+
+
+
+
+
