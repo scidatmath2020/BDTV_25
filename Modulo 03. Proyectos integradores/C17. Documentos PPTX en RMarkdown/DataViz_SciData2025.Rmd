@@ -1,0 +1,350 @@
+---
+title: "DataViz de SciData para el curso  \n &nbsp; \n &nbsp; \n &nbsp; \nTécnicas de graficación y bases de datos  \n &nbsp; \n &nbsp; \n \n &nbsp; \n Edición 2025"
+date: "`r format(Sys.Date(), '%B, %Y')`"
+output: 
+  powerpoint_presentation:
+    reference_doc: E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/RMD_PPTX/Plantilla.pptx
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+pacman::p_load(
+  "tidyverse","dplyr","readxl", "openxlsx", "haven",  "foreign",
+  "ggthemes", "cowplot","png","grid", "ggtext", "extrafont","sf"
+)
+
+# Gráfico 1  ---- 
+
+Data <- read_excel("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Bases de datos/Ejemplo_base.xlsx")
+
+G1 <- ggdraw(
+  Data %>% 
+    arrange(desc(Percepción_percent)) %>% 
+    slice_head(n = 5) %>% 
+    ggplot(aes(x = reorder(Espacio, -Percepción_percent), 
+               y = Percepción_percent))+
+    geom_col(fill = "#1D8348")+
+    geom_text(aes(label = round(Percepción_percent,1),
+                  vjust = -1),
+              size = 5)+
+    scale_y_continuous(limits = c(0,90))+
+    labs(title = "Porcentaje de percepción de seguridad según espacio",
+         subtitle = "personas mayores de 18 años",
+         caption = "Fuente. INEGI. Encuesta Nacional de Seguridad Urbana. (ENSU), 2025.",
+         x = "",
+         y = "")+
+    theme(plot.title = element_text(hjust = 0,
+                                    face = "bold.italic",
+                                    size = 14),
+          plot.subtitle = element_text(hjust = 0,
+                                       face = "italic",
+                                       size = 13),
+          plot.caption = element_text(hjust = 0,
+                                      face = "plain",
+                                      size = 11),
+          axis.text.x = element_text(size = 12,
+                                     face = "bold",
+                                     color = "black"),
+          panel.grid = element_blank(),
+          axis.ticks = element_blank(),
+          axis.text.y = element_blank(),
+          panel.background = element_blank(),
+          plot.background = element_rect(fill = alpha("white",.4)))
+)+
+  draw_image("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Imagenes/logo2.png",
+             x = 0.93,
+             y = 0.95,
+             hjust = 0.7, vjust = 0.5,
+             width = 0.2)
+
+
+# Gráfico 2 ----
+
+Data <- read_excel("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Bases de datos/Ejemplo_lineal.xlsx",
+                   sheet = "Datos")
+
+Data <- Data %>% 
+  mutate(Año2 = seq(as.Date("2011-01-01"),
+                    as.Date("2025-01-01"),
+                    by = "12 month"))
+
+
+G2 <- ggdraw(
+  Data %>% 
+    ggplot(aes(x = Año2, y=Porcentaje))+
+    geom_line(color = "#1C69A8",
+              linewidth = 2.5)+
+    geom_point(size = 4,
+               color = "#1C69A8")+
+    geom_text(aes(label = round(Porcentaje, 1)),
+              vjust = -1)+
+    scale_x_date(date_breaks = "1 year",
+                 date_labels = "%Y")+
+    scale_y_continuous(limits = c(0, 100))+
+    labs(
+      title = "<b style = 'color:#E7180B'> Población de 18 años y más</b><b style = 'color:#1C69A8'> que confia en los jueces</b>",
+      subtitle = "<i style = 'color:#E7180B'> del 2011 al 2024</i>",
+      caption = "<span style = 'color:#E7180B'> Fuente. INEGI. Encuesta Nacional de Segurdad Urbana (ENSU). 2025.</span>",
+      x = "<span style = 'color:#E7180B'> Año</span>",
+      y = ""
+    )+
+    theme(plot.title = element_markdown(size = 16),
+          plot.subtitle = element_markdown(size = 14),
+          plot.caption = element_markdown(hjust = 0,
+                                          size = 12),
+          axis.title.x = element_markdown(size = 13),
+          axis.text = element_text(color = "#1C69A8",
+                                   face = "bold",
+                                   size = 13),
+          panel.grid.minor = element_blank(),
+          panel.grid.major.x = element_blank(),
+          panel.grid.major.y = element_line(color = alpha("#7CB342",0.5),
+                                            linetype = "dashed"),
+          panel.background = element_rect(fill = "white"),
+          axis.ticks.x = element_blank(),
+          axis.ticks.y = element_line(color = "#7CB342")) 
+)+
+  draw_image("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Imagenes/logo2.png",
+             x = 0.93,
+             y = 0.95,
+             hjust = 0.7, vjust = 0.5,
+             width = 0.2) 
+
+# Gráfico 3 ----
+
+Data <- read.csv("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Bases de datos/ElectricCarData_Clean.csv")
+
+punto_max <- Data %>% 
+  filter(Range_Km == max(Range_Km))
+
+punto_max <- Data %>% 
+  filter(Range_Km > 550)
+
+punto_min <- Data %>% 
+  filter(Range_Km == min(Range_Km)) %>% 
+  slice_head(n = 1)
+
+
+G3 <- Data %>% 
+  ggplot(aes(x = TopSpeed_KmH, y = Range_Km,
+            color = PowerTrain))+
+  geom_smooth(method = "lm",
+              se = FALSE,
+              color = "#E7180B")+
+  geom_text(data = punto_max,
+            aes(label = paste(Brand, "-", Model, 
+                              "\n",
+                              "Vel.Máx:",
+                              TopSpeed_KmH,
+                              "Bat.:",
+                              Range_Km)),
+            vjust = -0.5, hjust = -0.1,
+            color = "black", fontface = "bold")+
+  annotate("segment",
+           x = punto_max$TopSpeed_KmH+10,
+           y = punto_max$Range_Km+10,
+           xend =  punto_max$TopSpeed_KmH+2,
+           yend = punto_max$Range_Km+2,
+           arrow = arrow(length = unit(0.2, "cm")),
+           color = "black",
+           size = 1.3)+
+  geom_text(data = punto_min,
+            aes(label = paste(Brand, "-", Model, 
+                              "\n",
+                              "Vel.Máx:",
+                              TopSpeed_KmH,
+                              "Bat.:",
+                              Range_Km)),
+            vjust = -0.2, hjust = -0.2,
+            color = "black", fontface = "bold")+
+  annotate("segment",
+           x = punto_min$TopSpeed_KmH+10,
+           y = punto_min$Range_Km+10,
+           xend =  punto_min$TopSpeed_KmH+2,
+           yend = punto_min$Range_Km+2,
+           arrow = arrow(length = unit(0.2, "cm")),
+           color = "black",
+           size = 1.3)+
+  geom_point(shape = 17, size =3)+
+  scale_x_continuous(breaks = seq(100,440,20),
+                     limits = c(100,450))+
+  scale_y_continuous(breaks = seq(50,1000,50),
+                     limits = c(50,1050))+
+  scale_color_manual(values = c(
+    "AWD" = "#009485",
+    "FWD" = "#940007",
+    "RWD" = "#000F94"
+  ))+
+  labs(
+    title = "<b style = 'color:#1C69A8'> Vehículos eléctricos según su </b><b style = 'color:#E7180B'> velocidad máxima</b><b style = 'color:#1C69A8'>, </b><b style = 'color:#E7180B'> autonomía de batería</b><b style = 'color:#1C69A8'> y</b><b style = 'color:#E7180B'> tipo de tracción</b>",
+    subtitle = "<i style = 'color:#E7180B'> registros del 2024</i>",
+    caption = "<span style = 'color:#E7180B'> Fuente. Kaggle. EVs - One Electric Vehicle Dataser-Smaller. (2024)</span>",
+    x = "<span style = 'color:#E7180B'> Velocidad máxima registrada</span>",
+    y = "<span style = 'color:#E7180B'> Autonomía de la batería</span>",
+    color = "<span style = 'color:#1C69A8'> Tipo de tracción:</span>"
+  )+
+  theme(plot.title = element_markdown(size = 16),
+        plot.subtitle = element_markdown(size = 14),
+        plot.caption = element_markdown(hjust = 0,
+                                        size = 12),
+        axis.title.x = element_markdown(size = 13),
+        axis.title.y = element_markdown(size = 13),
+        axis.text = element_text(color = "#1C69A8",
+                                 face = "bold",
+                                 size = 13),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = alpha("#7CB342",0.3),
+                                        linetype = "dashed"),
+        panel.background = element_rect(fill = "white"),
+        axis.ticks = element_line(color = "#7CB342"),
+        legend.position = "bottom",
+        legend.text = element_markdown(size = 12,
+                                       color = "#1C69A8"),
+        legend.title = element_markdown(size = 13)) 
+
+G3<- ggdraw(G3)+
+  draw_image("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Imagenes/logo2.png",
+             x = 0.93,
+             y = 0.95,
+             hjust = 0.7, vjust = 0.5,
+             width = 0.2) 
+
+
+
+# Gráfico 4 ----
+
+Tema1 <- theme(plot.title = element_markdown(size = 16),
+               plot.subtitle = element_markdown(size = 14),
+               plot.caption = element_markdown(hjust = 0,
+                                               size = 12),
+               axis.title.x = element_markdown(size = 13),
+               axis.text.x = element_text(color = "#1C69A8",
+                                        face = "bold",
+                                        size = 13,
+                                        angle = 90,
+                                        hjust = 1,
+                                        vjust = -0.1),
+               axis.text.y = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.grid.major.x = element_blank(),
+               panel.grid.major.y = element_blank(),
+               panel.background = element_rect(fill = "white"),
+               axis.ticks.x = element_blank(),
+               axis.ticks.y = element_blank(),
+               legend.position = "bottom",
+               legend.text = element_markdown(size = 12,
+                                              color = "#1C69A8"),
+               legend.title = element_markdown(size = 13))
+
+
+Data <- read_excel("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Bases de datos/Ingresos_penales.xlsx")
+
+Entidades <- Data %>% 
+  filter(!Entidad == "Estados Unidos Mexicanos") %>% 
+  arrange(desc(Total)) %>% 
+  pull(Entidad)
+
+Entidades <- c( "Estados Unidos Mexicanos",
+                Entidades)
+
+Data$Entidad <- factor(Data$Entidad,
+                       level = Entidades)
+
+
+
+Data <- Data %>% 
+  mutate(across(c(
+    "Hombres",
+    "Mujeres"
+  ),~./Total))
+
+
+G4 <- {Data %>% 
+  pivot_longer(cols = c(Hombres, Mujeres),
+               names_to = "Sexo",
+               values_to = "Porcentaje") %>% 
+  mutate(Sexo = factor(Sexo, levels = c("Mujeres", "Hombres"))) %>% 
+  ggplot(aes(x = Entidad, y = Porcentaje,
+             fill = Sexo))+
+  geom_col()+
+  geom_text(aes(label = scales::percent(Porcentaje, accuracy = 0.1,
+                                        suffix= " ")),
+            position = position_stack(vjust = 0.5),
+            fontface = "bold",
+            size = 3.5)+
+  scale_y_continuous(limits = c(0,1.15))+
+  geom_text(aes(x = Entidad, y = 1,
+                label = scales::comma(Total, big.mark = " ")),
+            angle = 90,
+            hjust = -0.1,
+            fontface = "bold",
+            size = 3.5)+
+  scale_fill_manual(values = c(
+    "Mujeres" = "#9C6DB0",
+    "Hombres"  = "#81B06D"
+  ))+
+  labs(
+    title = "<b style = 'color:#1C69A8'> Personas que ingresan a los </b><b style = 'color:#E7180B'> centros penitenciarios</b><b style = 'color:#1C69A8'> según su </b><b style = 'color:#E7180B'> sexo</b><b style = 'color:#1C69A8'> por</b><b style = 'color:#E7180B'> entidad federativa</b>",
+    subtitle = "<i style = 'color:#E7180B'> durante el año 2024 <br> porcentajes y absolutos </i>",
+    caption = "<span style = 'color:#E7180B'> Fuente. INEGI. Censo Nacional de Sistemas Penitenciarios Estatales, (2025)</span>",
+    x = "",
+    y = "",
+    fill = "<span style = 'color:#1C69A8'> Sexo:</span>"
+  )+
+  Tema1} %>% 
+  ggdraw(.)+
+  draw_image("E:/SciData/Bases de datos y técnicas de graficación/BDTG_SEP25/Imagenes/logo2.png",
+             x = 0.93,
+             y = 0.95,
+             hjust = 0.7, vjust = 0.5,
+             width = 0.2) 
+
+
+
+```
+
+# Gráfico de barras 
+
+```{r, fig.align='center', fig.width=15, fig.height=7, fig.dpi=500, warning=FALSE, message=FALSE, echo=FALSE}
+
+G1
+
+```
+
+
+# Gráfico de series de tiempo
+
+```{r, fig.align='center', fig.width=15, fig.height=7, fig.dpi=500, warning=FALSE, message=FALSE, echo=FALSE}
+
+G2
+
+```
+
+
+# Gráfico de dispersión
+
+```{r, fig.align='center', fig.width=15, fig.height=7, fig.dpi=500, warning=FALSE, message=FALSE, echo=FALSE}
+
+G3
+
+```
+
+
+# Gráfico de barras apiladas
+
+```{r, fig.align='center', fig.width=15, fig.height=8, fig.dpi=500, warning=FALSE, message=FALSE, echo=FALSE}
+
+G4
+
+```
+
+
+# Gráfico de barras apiladas
+
+En este gráfico se muestra la distribución porcentual de los ingresos en los sistemas penitenciarios estatales de México. Resaltando la división de la barra según el sexo y ordenando de mayor a menor ingreso (en la parte superior se muestra la cifra absoluta).
+
+```{r, fig.align='center', fig.width=14, fig.height=9, fig.dpi=500, warning=FALSE, message=FALSE, echo=FALSE}
+
+G4
+
+```
